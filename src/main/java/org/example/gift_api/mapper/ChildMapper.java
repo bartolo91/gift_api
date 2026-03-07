@@ -6,6 +6,8 @@ import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.entity.Child;
 
+import java.util.HashSet;
+
 @UtilityClass
 public class ChildMapper {
 
@@ -17,12 +19,13 @@ public class ChildMapper {
                 .build();
     }
 
-    public static ChildDTO mapToDTO(Child child) {
+    public static ChildDTO mapToDto(Child child) {
         return ChildDTO.builder()
+                .id(child.getId())
                 .firstName(child.getFirstName())
                 .lastName(child.getLastName())
                 .birthDate(child.getBirthDate())
-                .presentAmount(child.getPresents().size())
+                .presentCount(child.getPresents().stream().count())
                 .build();
     }
 
@@ -34,5 +37,4 @@ public class ChildMapper {
                 .birthDate(updateCommand.getBirthDate())
                 .build();
     }
-
 }

@@ -23,8 +23,12 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@NamedEntityGraph(name = "Child.presentSet",
-        attributeNodes = {@NamedAttributeNode("presents")})
+/**
+ * ten NamedEntityGraph jest jeszcze do wywołania przy wyszukiwaniu
+ * - zamiast tego można wskazać EntityGraph bezpośrednio na Query
+ * */
+//@NamedEntityGraph(name = "Child.presentSet",
+//        attributeNodes = {@NamedAttributeNode("presents")})
 public class Child {
 
     @Id
@@ -35,6 +39,7 @@ public class Child {
     private LocalDate birthDate;
 
     @OneToMany(mappedBy = "child")
+    @Builder.Default
     private Set<Present> presents = new HashSet<>();
 
 }

@@ -1,6 +1,7 @@
 package org.example.gift_api.model.command;
 
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,13 +12,13 @@ import java.time.LocalDate;
 @Setter
 public class CreateChildCommand {
 
-    @NotEmpty(message = "FIRST_NAME_NOT_EMPTY")
+    @NotBlank(message = "FIRST_NAME_NOT_EMPTY_OR_NULL")
     private String firstName;
 
-    @NotEmpty(message = "LAST_NAME_NOT_EMPTY")
+    @NotBlank
     private String lastName;
 
-    @NotEmpty(message = "BIRTH_DATE_NOT_EMPTY")
+    @NotNull
     @Past
     private LocalDate birthDate;
 }

@@ -3,26 +3,28 @@ package org.example.gift_api.controler;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.gift_api.model.command.CreateChildCommand;
+import org.example.gift_api.model.command.CreatePresentCommand;
+import org.example.gift_api.model.command.UpdateChildCommand;
+import org.example.gift_api.model.command.UpdatePresentCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.dto.PresentDTO;
-import org.example.gift_api.model.entity.Child;
-import org.example.gift_api.model.entity.Present;
 import org.example.gift_api.service.ChildService;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/children")
@@ -30,69 +32,80 @@ import java.util.stream.Collectors;
 public class ChildController {
 
     private final ChildService childService;
-    private final ModelMapper modelMapper;
 
     @PostMapping
-    public ResponseEntity<ChildDTO> addChild(@RequestBody @Valid CreateChildCommand childCommand) {
-        Child childEntity = childService.createChild(childCommand);
-        ChildDTO childDTO = modelMapper.map(childEntity, ChildDTO.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(childDTO);
+    public ResponseEntity<ChildDTO> create(@Valid @RequestBody CreateChildCommand childCommand) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(childService.createChild(childCommand));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ChildDTO> getChild(@PathVariable Long id) {
-        Child findChild = childService.getChildById(id);
-        ChildDTO childDTO = modelMapper.map(findChild, ChildDTO.class);
-        return ResponseEntity.status(HttpStatus.OK).body(childDTO);
+    public ResponseEntity<ChildDTO> getById(@PathVariable Long id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.getChildById(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<ChildDTO>> getAllChildren(@RequestParam(required = false, defaultValue = "0") int page) {
-        int pageNumber = page < 0 ? 0 : page;
-       Page<Child> children = childService.getAllChildren(pageNumber);
-        List<ChildDTO> childDTOs = children
-                .stream()
-                .map(child -> modelMapper.map(child, ChildDTO.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(childDTOs);
+    public ResponseEntity<Page<ChildDTO>> getAllWithPresents(@PageableDefault Pageable pageable) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.getAllChildren(pageable));
+    }
+
+    @GetMapping("/by-present-count")
+    public ResponseEntity<Page<ChildDTO>> getAllSortedByPresentsCount(@RequestParam(defaultValue = "true") boolean asc, @PageableDefault Pageable pageable) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.getAllChildrenSortedByPresentsCount(pageable, asc));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChild(@PathVariable Long id) {
-        Child findChild = childService.getChildById(id);
-        if (findChild != null) {
-            childService.deleteById(id);
-        }
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        childService.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @GetMapping("/{id}/presents")
-    public ResponseEntity<List<PresentDTO>> getChildPresents(@PathVariable Long id) {
-        List<Present> presents = childService.getAllPresents(id);
-        List<PresentDTO> presentsDTOs = presents
-                .stream()
-                .map(present -> modelMapper.map(present, PresentDTO.class))
-                .collect(Collectors.toList());
-        return ResponseEntity.status(HttpStatus.OK).body(presentsDTOs);
+    @PutMapping("/{id}")
+    public ResponseEntity<ChildDTO> update(@PathVariable Long id, @Valid @RequestBody UpdateChildCommand updateCommand) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.updateChild(id, updateCommand));
     }
 
-    @PostMapping("/{id}/presents/")
-    public ResponseEntity<ChildDTO> addPresent(@PathVariable Long childId) {
-        Child child = childService.addPresent(childId, presentId);
-        ChildDTO childDTO = modelMapper.map(child, ChildDTO.class);
-        return ResponseEntity.status(HttpStatus.OK).body(childDTO);
+    @PostMapping("/{childId}/presents")
+    public ResponseEntity<ChildDTO> addPresent(@PathVariable Long childId, @Valid @RequestBody CreatePresentCommand presentCommand) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(childService.addPresentByChildId(childId, presentCommand));
     }
 
+    @GetMapping("/{childId}/presents")
+    public ResponseEntity<List<PresentDTO>> getChildPresents(@PathVariable Long childId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.findPresentsByChildId(childId));
+    }
 
+    @GetMapping("/{childId}/presents/{presentId}")
+    public ResponseEntity<PresentDTO> getPresentByChildAndPresentId(@PathVariable Long childId, @PathVariable Long presentId) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.getPresentByChildAndPresentId(childId, presentId));
+    }
 
-
-
-    @DeleteMapping("/{id}/presents/{presentId}")
+    @DeleteMapping("/{childId}/presents/{presentId}")
     public ResponseEntity<ChildDTO> removePresent(@PathVariable Long childId, @PathVariable Long presentId) {
-        Child child = childService.removePresent(childId, presentId);
-        ChildDTO childDTO = modelMapper.map(child, ChildDTO.class);
-        return ResponseEntity.status(HttpStatus.OK).body(childDTO);
+        childService.removePresent(childId, presentId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
+    @PutMapping("/{childId}/presents/{presentId}")
+    public ResponseEntity<PresentDTO> updatePresent(@PathVariable Long childId, @PathVariable Long presentId, @Valid @RequestBody UpdatePresentCommand command) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.updatePresent(childId, presentId, command));
+    }
 }
 

@@ -1,11 +1,9 @@
 package org.example.gift_api.model.command;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.AttributeAccessor;
 
 import java.time.LocalDate;
 
@@ -16,13 +14,12 @@ public class UpdateChildCommand {
 
     //wersja
 
-    @NotEmpty(message = "FIRST_NAME_NOT_EMPTY")
+    @NotBlank
     private String firstName;
 
-    @NotEmpty(message = "LAST_NAME_NOT_EMPTY")
+    @NotBlank
     private String lastName;
 
-    @NotEmpty(message = "BIRTH_DATE_NOT_EMPTY")
-    @Past
+    @NotBlank
     private LocalDate birthDate;
 }

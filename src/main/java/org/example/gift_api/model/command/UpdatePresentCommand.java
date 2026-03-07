@@ -1,20 +1,22 @@
 package org.example.gift_api.model.command;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
-public class PresentCommand {
+@Accessors(chain = true)
+public class UpdatePresentCommand {
 
-    @NotEmpty
+    //wersja
+
+    @NotBlank
     private String name;
 
-    @NotEmpty
-    @Positive
+    @NotBlank
     private BigDecimal price;
 }

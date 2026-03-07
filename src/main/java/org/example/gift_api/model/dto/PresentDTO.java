@@ -1,10 +1,12 @@
 package org.example.gift_api.model.dto;
 
-import lombok.Value;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
-@Value
+@Getter
+@Builder
 public class PresentDTO {
 
     private Long id;
