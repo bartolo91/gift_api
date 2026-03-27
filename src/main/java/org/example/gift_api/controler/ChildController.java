@@ -8,7 +8,9 @@ import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.dto.PresentDTO;
+import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.service.ChildService;
+import org.example.gift_api.service.PresentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -32,6 +34,7 @@ import java.util.List;
 public class ChildController {
 
     private final ChildService childService;
+    private final PresentService presentService;
 
     @PostMapping
     public ResponseEntity<ChildDTO> create(@Valid @RequestBody CreateChildCommand childCommand) {
@@ -48,17 +51,10 @@ public class ChildController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ChildDTO>> getAllWithPresents(@PageableDefault Pageable pageable) {
+    public ResponseEntity<Page<ChildDTO>> getAll(@PageableDefault Pageable pageable) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(childService.getAllChildren(pageable));
-    }
-
-    @GetMapping("/by-present-count")
-    public ResponseEntity<Page<ChildDTO>> getAllSortedByPresentsCount(@RequestParam(defaultValue = "true") boolean asc, @PageableDefault Pageable pageable) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(childService.getAllChildrenSortedByPresentsCount(pageable, asc));
+                .body(childService.getAll(pageable));
     }
 
     @DeleteMapping("/{id}")
@@ -75,10 +71,10 @@ public class ChildController {
     }
 
     @PostMapping("/{childId}/presents")
-    public ResponseEntity<ChildDTO> addPresent(@PathVariable Long childId, @Valid @RequestBody CreatePresentCommand presentCommand) {
+    public ResponseEntity<PresentDTO> addPresent(@PathVariable Long childId, @Valid @RequestBody CreatePresentCommand presentCommand) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(childService.addPresentByChildId(childId, presentCommand));
+                .body(presentService.create(presentCommand, childId));
     }
 
     @GetMapping("/{childId}/presents")
@@ -106,6 +102,16 @@ public class ChildController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(childService.updatePresent(childId, presentId, command));
+    }
+
+    @GetMapping("/search")
+    public List<ChildView> search(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Integer minAge,
+            @RequestParam(required = false) Integer maxAge,
+            @RequestParam(required = false) Integer minPresents,
+            @RequestParam(required = false) Integer maxPresents) {
+        return childService.findFilteredChildren(name, minAge, maxAge, minPresents, maxPresents);
     }
 }
 

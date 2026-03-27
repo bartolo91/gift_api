@@ -1,58 +1,132 @@
 package org.example.gift_api.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.gift_api.GiftApiApplication;
 import org.example.gift_api.model.command.CreateChildCommand;
+import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.entity.Child;
+import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
-import org.example.gift_api.repository.PresentRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(classes = GiftApiApplication.class)
-@AutoConfigureMockMvc
+@ExtendWith(MockitoExtension.class)
 class ChildServiceTest {
 
     @Mock
     private ChildRepository childRepository;
 
     @Mock
-    private PresentRepository presentRepository;
+    private PresentService presentService;
 
     @InjectMocks
     private ChildService childService;
 
     @Test
-    void shouldReturnChildById() {
-        // given
-        Child child = new Child();
-        child.setId(1L);
+    void shouldCreateChild() {
+        CreateChildCommand command = new CreateChildCommand();
+        command.setFirstName("Jan");
 
-        when(childRepository.findById(1L))
+        Child saved = new Child();
+        saved.setFirstName("Jan");
+
+        when(childRepository.save(any())).thenReturn(saved);
+
+        ChildDTO result = childService.createChild(command);
+
+        assertEquals("Jan", result.getFirstName());
+        verify(childRepository).save(any());
+    }
+
+    @Test
+    void shouldGetChildById() {
+        Long id = 1L;
+
+        Child child = new Child();
+        child.setId(id);
+
+        when(childRepository.findByIdWithPresentCount(id))
                 .thenReturn(Optional.of(child));
 
-        // when
-        ChildDTO result = childService.getChildById(1L);
+        ChildDTO result = childService.getChildById(id);
 
-        // then
-        assertNotNull(result);
-        verify(childRepository).findById(1L);
+        assertEquals(id, result.getId());
+    }
+
+    @Test
+    void shouldThrowWhenChildNotFound() {
+        when(childRepository.findByIdWithPresentCount(1L))
+                .thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class,
+                () -> childService.getChildById(1L));
+    }
+
+    @Test
+    void shouldDeleteChild() {
+        Long id = 1L;
+
+        when(childRepository.findById(id))
+                .thenReturn(Optional.of(new Child()));
+
+        childService.deleteById(id);
+
+        verify(childRepository).deleteById(id);
+    }
+
+    @Test
+    void shouldNotDeleteWhenChildNotExists() {
+        when(childRepository.findById(1L))
+                .thenReturn(Optional.empty());
+
+        childService.deleteById(1L);
+
+        verify(childRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void shouldUpdateChild() {
+        Long id = 1L;
+
+        Child child = new Child();
+        child.setFirstName("Old");
+
+        UpdateChildCommand command = new UpdateChildCommand();
+        command.setFirstName("New");
+
+        when(childRepository.findById(id)).thenReturn(Optional.of(child));
+
+        ChildDTO result = childService.updateChild(id, command);
+
+        assertEquals("New", result.getFirstName());
+    }
+
+    @Test
+    void shouldRemovePresent() {
+        childService.removePresent(1L, 2L);
+
+        verify(presentService).deleteById(1L, 2L);
+    }
+
+    @Test
+    void shouldSearchChildren() {
+        when(childRepository.findFilteredChildren("Jan", 5, null,1, null))
+                .thenReturn(List.of(new ChildView(), new ChildView()));
+
+        List<ChildView> result = childService.findFilteredChildren("Jan", 5, null,1, null);
+
+        assertEquals(2, result.size());
     }
 }

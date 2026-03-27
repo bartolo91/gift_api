@@ -15,10 +15,10 @@ public class CreateChildCommand {
     @NotBlank(message = "FIRST_NAME_NOT_EMPTY_OR_NULL")
     private String firstName;
 
-    @NotBlank
+    @NotBlank(message = "LAST_NAME_NOT_EMPTY_OR_NULL")
     private String lastName;
 
-    @NotNull
-    @Past
+    @NotNull(message = "BIRTH_DATE_NOT_NULL")
+    @Past(message = "BIRTH_DATE_NOT_FUTURE")
     private LocalDate birthDate;
 }

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Setter
 public class CreatePresentCommand {
 
-    @NotBlank
+    @NotBlank(message = "NAME_NOT_EMPTY_OR_NULL")
     private String name;
 
     @NotNull

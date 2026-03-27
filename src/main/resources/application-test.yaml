@@ -1,9 +1,12 @@
 spring:
+  application:
+    name: gift_api
+
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: jdbc:h2:mem:gift_api_test
+    driver-class-name: org.h2.Driver
     username: sa
     password:
-    driver-class-name: org.h2.Driver
 
   jpa:
     show-sql: true
@@ -11,9 +14,13 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
 
   h2:
     console:
       enabled: true
       path: /h2
+
+  sql:
+    init:
+      platform: h2

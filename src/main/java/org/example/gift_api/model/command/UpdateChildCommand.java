@@ -1,6 +1,8 @@
 package org.example.gift_api.model.command;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -12,14 +14,14 @@ import java.time.LocalDate;
 @Accessors(chain = true)
 public class UpdateChildCommand {
 
-    //wersja
-
     @NotBlank
     private String firstName;
 
     @NotBlank
     private String lastName;
 
-    @NotBlank
+    @NotNull
+    @Past
     private LocalDate birthDate;
+
 }

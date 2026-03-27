@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: 03-create-view-child
+      author: bartek
+
+      changes:
+        - createView:
+            viewName: child_view
+            replaceIfExists: true
+            selectQuery: |
+              SELECT
+                  c.id,
+                  c.first_name,
+                  c.last_name,
+                  c.birth_date,
+                  TIMESTAMPDIFF(YEAR, c.birth_date, CURDATE()) AS age,
+                  COUNT(p.id) AS presents_count
+              FROM child c
+              LEFT JOIN present p ON c.id = p.child_id
+              GROUP BY c.id, c.first_name, c.last_name, c.birth_date

@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: changelog/01-create-table-child.yaml
+  - include:
+      file: changelog/02-create-table-present.yaml
+  - include:
+      file: changelog/03-create-view-child.yaml

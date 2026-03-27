@@ -1,19 +1,22 @@
 package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gift_api.exceptions.types.EntityNotFoundException;
 import org.example.gift_api.mapper.PresentMapper;
 import org.example.gift_api.model.command.CreatePresentCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
 import org.example.gift_api.model.dto.PresentDTO;
 import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.Present;
+import org.example.gift_api.repository.ChildRepository;
 import org.example.gift_api.repository.PresentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import static org.example.gift_api.exceptions.GiftApiException.notFound;
+import static org.example.gift_api.mapper.PresentMapper.mapFromCommand;
+import static org.example.gift_api.mapper.PresentMapper.mapToDto;
 import static org.example.gift_api.mapper.PresentMapper.updateFromCommand;
 
 @Service
@@ -21,37 +24,57 @@ import static org.example.gift_api.mapper.PresentMapper.updateFromCommand;
 public class PresentService {
 
     private final PresentRepository presentRepository;
+    private final ChildRepository childRepository;
 
-    public Present create(CreatePresentCommand presentCommand, Child child) {
-        return presentRepository.saveAndFlush(Present.builder()
-                .name(presentCommand.getName())
-                .price(presentCommand.getPrice())
-                .child(child)
-                .build());
+    @Transactional
+    public PresentDTO create(CreatePresentCommand presentCommand, Long childId) {
+        Child child = childRepository.findByIdWIthPessimisticLocking(childId)
+                .orElseThrow(() -> notFound(Child.class, childId));
+        if (child.getPresents().size() >= 3) {
+            throw new IllegalArgumentException("Child cant have more than 3 gifts");
+        }
+        Present present = mapFromCommand(presentCommand);
+        present.setChild(child);
+        return mapToDto(presentRepository.save(present));
     }
 
     public PresentDTO findPresentByPresentAndChildId(Long childId, Long presentId) {
+        childRepository.findById(childId)
+                .orElseThrow(() -> notFound(Child.class, childId));
+
         return presentRepository.findPresentByPresentAndChildId(childId, presentId)
                 .map(PresentMapper::mapToDto)
-                .orElseThrow(() -> new EntityNotFoundException(Present.class, presentId));
+                .orElseThrow(() -> notFound(Present.class, presentId));
     }
 
     public List<PresentDTO> findAllByChildId(Long childId) {
+        childRepository.findById(childId)
+                .orElseThrow(() -> notFound(Child.class, childId));
+
         return presentRepository.findAllByChildId(childId)
                 .stream()
-                .map(PresentMapper::mapToDto).collect(Collectors.toList());
+                .map(PresentMapper::mapToDto)
+                .toList();
     }
 
-    public void deleteById(Long id) {
-        if (presentRepository.findById(id).isPresent()) {
-            presentRepository.deleteById(id);
+    public void deleteById(Long childId, Long presentId) {
+        childRepository.findById(childId)
+                .orElseThrow(() -> notFound(Child.class, childId));
+
+        if (presentRepository.findPresentByPresentAndChildId(presentId, childId).isPresent()) {
+            presentRepository.deleteById(presentId);
         }
     }
 
     public PresentDTO update(Long childId, Long presentId, UpdatePresentCommand updateCommand) {
+        childRepository.findById(childId)
+                .orElseThrow(() -> notFound(Child.class, childId));
+
         Present present = presentRepository.findPresentByPresentAndChildId(childId, presentId)
-                .orElseThrow(() -> new EntityNotFoundException(Present.class, presentId));
+                .orElseThrow(() -> notFound(Present.class, childId));
 
         return PresentMapper.mapToDto(updateFromCommand(present, updateCommand));
     }
+
+
 }

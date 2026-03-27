@@ -22,6 +22,7 @@ public class PresentMapper {
                 .id(present.getId())
                 .name(present.getName())
                 .price(present.getPrice())
+                .version(present.getVersion())
                 .build();
     }
 
@@ -39,5 +40,4 @@ public class PresentMapper {
         present.setPrice(updateCommand.getPrice());
         return present;
     }
-
 }
