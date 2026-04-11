@@ -3,7 +3,7 @@ spring:
     name: gift_api
 
   datasource:
-    url: jdbc:h2:mem:gift_api_test
+    url: jdbc:h2:mem:gift_api
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -14,8 +14,7 @@ spring:
     open-in-view: false
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: create
-
+      ddl-auto: none
   h2:
     console:
       enabled: true

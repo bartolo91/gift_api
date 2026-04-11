@@ -14,11 +14,11 @@ import java.math.BigDecimal;
 @Accessors(chain = true)
 public class UpdatePresentCommand {
 
-    @NotBlank
+    @NotBlank(message = "NO_VALUE")
     private String name;
 
-    @NotNull
-    @Positive
+    @NotNull(message = "NULL_VALUE")
+    @Positive(message = "POSITIVE_VALUE")
     private BigDecimal price;
 
 }

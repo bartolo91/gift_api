@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: gift_api
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gift_api
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    open-in-view: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: none

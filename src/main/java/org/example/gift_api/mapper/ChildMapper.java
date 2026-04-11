@@ -5,6 +5,10 @@ import org.example.gift_api.model.command.CreateChildCommand;
 import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.entity.Child;
+import org.example.gift_api.model.entity.ChildView;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 @UtilityClass
 public class ChildMapper {
@@ -37,10 +41,30 @@ public class ChildMapper {
 //                .build();
 //    }
 
-    public static Child updateFromCommand(Child child, UpdateChildCommand updateCommand) {
-        child.setFirstName(updateCommand.getFirstName());
-        child.setLastName(updateCommand.getLastName());
-        child.setBirthDate(updateCommand.getBirthDate());
-        return child;
+    public static Child updateFromCommand(long id, UpdateChildCommand command) {
+        return Child.builder()
+                .id(id)
+                .version(command.getVersion())
+                .firstName(command.getFirstName())
+                .lastName(command.getLastName())
+                .birthDate(command.getBirthDate())
+                .build();
+    }
+
+    public static ChildView mapToView(Child child) {
+        return new ChildView(
+                child.getId(),
+                child.getFirstName(),
+                child.getLastName(),
+                child.getBirthDate(),
+                calculateAge(child.getBirthDate()),
+                child.getPresents() != null ? child.getPresents().size() : 0
+        );
+    }
+
+    private static Integer calculateAge(LocalDate birthDate) {
+        if (birthDate == null)
+            return null;
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }

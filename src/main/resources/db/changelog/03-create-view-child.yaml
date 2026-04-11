@@ -1,0 +1,67 @@
+databaseChangeLog:
+  - changeSet:
+      id: 03-create-view-child-postgres
+      author: bartek
+      dbms: postgresql
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - viewExists:
+                viewName: child_view
+      changes:
+        - sql:
+            sql: |
+              CREATE VIEW child_view AS
+              SELECT c.id,
+                     c.first_name,
+                     c.last_name,
+                     c.birth_date,
+                     EXTRACT(YEAR FROM AGE(c.birth_date)) AS age,
+                     COUNT(p.id) AS presents_count
+              FROM child c
+              LEFT JOIN present p ON c.id = p.child_id
+              GROUP BY c.id, c.first_name, c.last_name, c.birth_date;
+  - changeSet:
+      id: 03-create-view-child-mysql
+      author: bartek
+      dbms: mysql
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - viewExists:
+                viewName: child_view
+      changes:
+        - sql:
+            sql: |
+              CREATE VIEW child_view AS
+              SELECT c.id,
+                     c.first_name,
+                     c.last_name,
+                     c.birth_date,
+                     TIMESTAMPDIFF(YEAR, c.birth_date, CURDATE()) AS age,
+                     COUNT(p.id) AS presents_count
+              FROM child c
+              LEFT JOIN present p ON c.id = p.child_id
+              GROUP BY c.id, c.first_name, c.last_name, c.birth_date;
+  - changeSet:
+      id: 03-create-view-child-oracle
+      author: bartek
+      dbms: oracle
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - viewExists:
+                viewName: child_view
+      changes:
+        - sql:
+            sql: |
+              CREATE VIEW child_view AS
+              SELECT c.id,
+                     c.first_name,
+                     c.last_name,
+                     c.birth_date,
+                     FLOOR(MONTHS_BETWEEN(SYSDATE, c.birth_date) / 12) AS age,
+                     COUNT(p.id) AS presents_count
+              FROM child c
+              LEFT JOIN present p ON c.id = p.child_id
+              GROUP BY c.id, c.first_name, c.last_name, c.birth_date;

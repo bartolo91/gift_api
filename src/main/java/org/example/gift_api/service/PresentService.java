@@ -1,6 +1,7 @@
 package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gift_api.mapper.PresentMapper;
 import org.example.gift_api.model.command.CreatePresentCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
@@ -14,11 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.example.gift_api.exceptions.GiftApiException.concurrentModification;
+import static org.example.gift_api.exceptions.GiftApiException.exceededCountOfPresents;
 import static org.example.gift_api.exceptions.GiftApiException.notFound;
 import static org.example.gift_api.mapper.PresentMapper.mapFromCommand;
 import static org.example.gift_api.mapper.PresentMapper.mapToDto;
 import static org.example.gift_api.mapper.PresentMapper.updateFromCommand;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PresentService {
@@ -28,13 +32,24 @@ public class PresentService {
 
     @Transactional
     public PresentDTO create(CreatePresentCommand presentCommand, Long childId) {
-        Child child = childRepository.findByIdWIthPessimisticLocking(childId)
+        log.info("Creating present");
+        Child child = childRepository.findWithLockingById(childId)
                 .orElseThrow(() -> notFound(Child.class, childId));
+        log.info("----lock acquired----");
+
         if (child.getPresents().size() >= 3) {
-            throw new IllegalArgumentException("Child cant have more than 3 gifts");
+            throw exceededCountOfPresents();
         }
+
         Present present = mapFromCommand(presentCommand);
         present.setChild(child);
+
+        try {
+            Thread.sleep(10000);
+        } catch (Exception e) {
+            throw concurrentModification();
+        }
+        log.info("saving");
         return mapToDto(presentRepository.save(present));
     }
 
@@ -61,7 +76,7 @@ public class PresentService {
         childRepository.findById(childId)
                 .orElseThrow(() -> notFound(Child.class, childId));
 
-        if (presentRepository.findPresentByPresentAndChildId(presentId, childId).isPresent()) {
+        if (presentRepository.findPresentByPresentAndChildId(childId, presentId).isPresent()) {
             presentRepository.deleteById(presentId);
         }
     }

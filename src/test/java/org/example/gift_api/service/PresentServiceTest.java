@@ -50,7 +50,7 @@ class PresentServiceTest {
         command.setName("Lego");
         command.setPrice(BigDecimal.valueOf(100));
 
-        when(childRepository.findByIdWIthPessimisticLocking(childId))
+        when(childRepository.findWithLockingById(childId))
                 .thenReturn(Optional.of(child));
 
         when(presentRepository.save(any()))
@@ -70,7 +70,7 @@ class PresentServiceTest {
         Child child = new Child();
         child.setPresents(Set.of(new Present(), new Present(), new Present()));
 
-        when(childRepository.findByIdWIthPessimisticLocking(childId))
+        when(childRepository.findWithLockingById(childId))
                 .thenReturn(Optional.of(child));
 
         CreatePresentCommand command = new CreatePresentCommand();

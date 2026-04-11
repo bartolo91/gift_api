@@ -50,7 +50,7 @@ class ChildMapperTest {
         UpdateChildCommand updatedChild = new UpdateChildCommand();
         updatedChild.setFirstName("Anna");
 
-        Child updated = ChildMapper.updateFromCommand(child, updatedChild);
+        Child updated = ChildMapper.updateFromCommand(child.getId(), updatedChild);
 
         assertEquals("Anna", updated.getFirstName());
     }

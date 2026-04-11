@@ -2,6 +2,7 @@ package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gift_api.mapper.ChildMapper;
+import org.example.gift_api.model.ChildSpecification;
 import org.example.gift_api.model.command.CreateChildCommand;
 import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
@@ -10,14 +11,17 @@ import org.example.gift_api.model.dto.PresentDTO;
 import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
+import org.example.gift_api.repository.ChildViewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
+import static org.example.gift_api.exceptions.GiftApiException.badRequest;
 import static org.example.gift_api.exceptions.GiftApiException.notFound;
 import static org.example.gift_api.mapper.ChildMapper.mapFromCommand;
 import static org.example.gift_api.mapper.ChildMapper.mapToDto;
@@ -30,6 +34,7 @@ public class ChildService {
 
     private final ChildRepository childRepository;
     private final PresentService presentService;
+    private final ChildViewRepository childViewRepository;
 
     public ChildDTO createChild(CreateChildCommand childCommand) {
         return mapToDto(childRepository.save(mapFromCommand(childCommand)));
@@ -53,11 +58,14 @@ public class ChildService {
 
     @Transactional
     public ChildDTO updateChild(Long id, UpdateChildCommand updateCommand) {
-        Child child = childRepository.findById(id)
+        childRepository.findById(id)
                 .orElseThrow(() -> notFound(Child.class, id));
-
-        Child updated = updateFromCommand(child, updateCommand);
-        return mapToDto(updated);
+        try {
+            Child updated = updateFromCommand(id, updateCommand);
+            return mapToDto(childRepository.save(updated));
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw badRequest();
+        }
     }
 
     public List<PresentDTO> findPresentsByChildId(Long childId) {
@@ -81,8 +89,12 @@ public class ChildService {
         return childRepository.findFilteredChildren(name, minAge, maxAge, minPresents, maxPresents);
     }
 
-    @Transactional
-    public Optional<Child> findByIdWIthPessimisticLocking(Long childId) {
-        return childRepository.findByIdWIthPessimisticLocking(childId);
+    public Page<ChildView> search(Pageable pageable, String firstName, String lastName, Integer age, Integer presents) {
+        Specification<ChildView> spec = ChildSpecification.hasFirstName(firstName)
+                .and(ChildSpecification.hasLastName(lastName))
+                .and(ChildSpecification.hasMinAge(age))
+                .and(ChildSpecification.hasMinPresents(presents));
+
+        return childViewRepository.findAll(spec, pageable);
     }
 }

@@ -14,14 +14,17 @@ import java.time.LocalDate;
 @Accessors(chain = true)
 public class UpdateChildCommand {
 
-    @NotBlank
+    @NotBlank(message = "NO_VALUE")
     private String firstName;
 
-    @NotBlank
+    @NotBlank(message = "NO_VALUE")
     private String lastName;
 
-    @NotNull
-    @Past
+    @NotNull(message = "NULL_VALUE")
+    @Past(message = "FUTURE_VALUE")
     private LocalDate birthDate;
+
+    @NotNull(message = "NULL_VALUE")
+    private Long version;
 
 }

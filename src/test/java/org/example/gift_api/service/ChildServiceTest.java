@@ -119,14 +119,4 @@ class ChildServiceTest {
 
         verify(presentService).deleteById(1L, 2L);
     }
-
-    @Test
-    void shouldSearchChildren() {
-        when(childRepository.findFilteredChildren("Jan", 5, null,1, null))
-                .thenReturn(List.of(new ChildView(), new ChildView()));
-
-        List<ChildView> result = childService.findFilteredChildren("Jan", 5, null,1, null);
-
-        assertEquals(2, result.size());
-    }
 }

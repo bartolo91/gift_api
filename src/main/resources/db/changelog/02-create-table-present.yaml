@@ -2,7 +2,11 @@ databaseChangeLog:
   - changeSet:
       id: 02-create-present
       author: bartek
-
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: present
       changes:
         - createTable:
             tableName: present
@@ -14,33 +18,27 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
                     nullable: false
-
               - column:
                   name: version
                   type: BIGINT
                   defaultValueNumeric: 0
                   constraints:
                     nullable: false
-
               - column:
                   name: name
                   type: VARCHAR(255)
-
               - column:
                   name: price
                   type: DECIMAL(19,2)
-
               - column:
                   name: child_id
                   type: BIGINT
-
         - addForeignKeyConstraint:
             baseTableName: present
             baseColumnNames: child_id
             referencedTableName: child
             referencedColumnNames: id
             constraintName: fk_present_child
-
         - createIndex:
             tableName: present
             columns:

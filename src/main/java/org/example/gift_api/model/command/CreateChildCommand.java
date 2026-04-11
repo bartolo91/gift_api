@@ -12,13 +12,13 @@ import java.time.LocalDate;
 @Setter
 public class CreateChildCommand {
 
-    @NotBlank(message = "FIRST_NAME_NOT_EMPTY_OR_NULL")
+    @NotBlank(message = "NO_VALUE")
     private String firstName;
 
-    @NotBlank(message = "LAST_NAME_NOT_EMPTY_OR_NULL")
+    @NotBlank(message = "NO_VALUE")
     private String lastName;
 
-    @NotNull(message = "BIRTH_DATE_NOT_NULL")
-    @Past(message = "BIRTH_DATE_NOT_FUTURE")
+    @NotNull(message = "NULL_VALUE")
+    @Past(message = "FUTURE_VALUE")
     private LocalDate birthDate;
 }

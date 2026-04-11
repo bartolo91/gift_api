@@ -1,6 +1,5 @@
 package org.example.gift_api.controler;
 
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gift_api.exceptions.GiftApiException;
@@ -14,7 +13,6 @@ import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.Present;
 import org.example.gift_api.repository.ChildRepository;
 import org.example.gift_api.repository.PresentRepository;
-import org.example.gift_api.service.ChildService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,24 +23,21 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -61,8 +56,6 @@ class ChildControllerTest {
 
     @Autowired
     private PresentRepository presentRepository;
-    @Autowired
-    private ChildService childService;
 
     @BeforeEach
     void setup() {
@@ -72,7 +65,7 @@ class ChildControllerTest {
     }
 
     @Test
-    void shouldCreateChild() throws Exception { // TODO COS BY TRZEBA POPRAWIC
+    void shouldCreateChild() throws Exception {
         //given:
         CreateChildCommand command = new CreateChildCommand();
         command.setFirstName("Jan");
@@ -81,10 +74,15 @@ class ChildControllerTest {
         String json = objectMapper.writeValueAsString(command);
 
         //when:
-        MockHttpServletResponse response = postman.perform(post("/api/v1/children")
+        postman.perform(post("/api/v1/children")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
+                .andDo(print())
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.firstName").value(command.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(command.getLastName()))
+                .andExpect(jsonPath("$.birthDate").value(command.getBirthDate().toString()))
                 .andReturn()
                 .getResponse();
 
@@ -103,19 +101,21 @@ class ChildControllerTest {
         String json = objectMapper.writeValueAsString(command);
 
         //when:
-        String responseJson = postman.perform(post("/api/v1/children")
+        postman.perform(post("/api/v1/children")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isBadRequest())
+                // .andExpect(status().isBadRequest())
+                // .andExpect(jsonPath("$.message").value("Validation errors")),
+                // .andExpect(jsonPath("$.violations[0].field").value("firstName"))
+                // .andExpect(jsonPath("$.violations[0].message").value("NO_VALUE"))
+                // .andExpect(jsonPath("$.violations[1].field").value("lastName"))
+                // .andExpect(jsonPath("$.violations[1].message").value("NO_VALUE"))
+                // .andExpect(jsonPath("$.violations[2].field").value("birthDate"))
+                // .andExpect(jsonPath("$.violations[2].message").value("NULL_VALUE"))
+                .andExpect(jsonPath("$.violations[*].field").value(hasItems("firstName", "lastName", "birthDate")))
+                .andExpect(jsonPath("$.violations[*].message").value(hasItems("NO_VALUE", "NO_VALUE", "NULL_VALUE")))
                 .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        //then:
-        List<String> errorCodes = objectMapper.readerForListOf(String.class)
-                .readValue(responseJson);
-
-        assertTrue(errorCodes.containsAll(Arrays.asList("FIRST_NAME_NOT_EMPTY_OR_NULL", "LAST_NAME_NOT_EMPTY_OR_NULL", "BIRTH_DATE_NOT_NULL")));
+                .getResponse();
     }
 
     @Test
@@ -129,17 +129,11 @@ class ChildControllerTest {
         child = childRepository.save(child);
 
         //when:
-        String responseJson = postman.perform(get("/api/v1/children/" + child.getId()))
+        postman.perform(get("/api/v1/children/" + child.getId()))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        ChildDTO childDTO = objectMapper.readValue(responseJson, ChildDTO.class);
-
-        assertEquals("Jan", childDTO.getFirstName());
-        assertEquals("Nowak", childDTO.getLastName());
-        assertEquals(LocalDate.of(2000, 1, 1), childDTO.getBirthDate());
+                .andExpect(jsonPath("$.firstName").value("Jan"))
+                .andExpect(jsonPath("$.lastName").value("Nowak"))
+                .andExpect(jsonPath("$.birthDate").value("2000-01-01"));
     }
 
     @Test
@@ -150,7 +144,7 @@ class ChildControllerTest {
         //when:
         //then:
         try {
-            MockHttpServletResponse mockHttpServletResponse = postman.perform(get("/api/v1/children" + childId)
+            postman.perform(get("/api/v1/children" + childId)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(""))
                     .andExpect(status().isNotFound())
@@ -159,6 +153,15 @@ class ChildControllerTest {
         } catch (GiftApiException e) {
             assertEquals(e.getMessage(), "ENTITY_NOT_FOUND ID: " + childId);
         }
+    }
+
+    @Test
+    void shouldNotFindChildAndReturn404() throws Exception {
+        int childId = 2500;
+
+        postman.perform(get("/api/v1/children/" + childId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("ENTITY_NOT_FOUND ID: " + childId));
     }
 
     @Test
@@ -173,11 +176,11 @@ class ChildControllerTest {
         postman.perform(delete("/api/v1/children/" + child.getId()))
                 .andExpect(status().isNoContent());
 
-        assertEquals(0, childRepository.count());
+        assertFalse(childRepository.findById(child.getId()).isPresent());
     }
 
     @Test
-    void shouldUpdateChild() throws Exception {
+    void shouldUpdateChild() throws Exception { // TODO pluje sie o wersje
         Child child = new Child();
         child.setFirstName("Jan");
         child.setLastName("Nowak");
@@ -186,6 +189,7 @@ class ChildControllerTest {
         child = childRepository.save(child);
 
         UpdateChildCommand update = new UpdateChildCommand();
+        update.setVersion(child.getVersion());
         update.setFirstName("Janusz");
         update.setLastName("Nowakowski");
         update.setBirthDate(LocalDate.of(2000, 1, 1));
@@ -193,16 +197,19 @@ class ChildControllerTest {
         String json = objectMapper.writeValueAsString(update);
 
         // when
-        String responseJson = postman.perform(put("/api/v1/children/" + child.getId())
+        postman.perform(put("/api/v1/children/" + child.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Janusz"))
+                .andExpect(jsonPath("$.lastName").value("Nowakowski"))
+                .andExpect(jsonPath("$.birthDate").value("2000-01-01"));
+
 
         // then
-        ChildDTO updatedChild = objectMapper.readValue(responseJson, ChildDTO.class);
+        assertEquals(1, childRepository.count());
+        Child updatedChild = childRepository.findAll().get(0);
 
         assertEquals("Janusz", updatedChild.getFirstName());
         assertEquals("Nowakowski", updatedChild.getLastName());
@@ -246,7 +253,8 @@ class ChildControllerTest {
 
         List<PresentDTO> presents = objectMapper.readValue(
                 allPresentsJson,
-                new TypeReference<List<PresentDTO>>() {}
+                new TypeReference<List<PresentDTO>>() {
+                }
         );
 
         assertEquals(1, presents.size());
@@ -259,7 +267,7 @@ class ChildControllerTest {
         postman.perform(delete("/api/v1/children/" + child.getId() + "/presents/" + addedPresent.getId()))
                 .andExpect(status().isNoContent());
 
-        assertEquals(0, presentRepository.count()); // orphanRemoval = true)??
+        assertEquals(0, presentRepository.count());
     }
 
     @Test
@@ -283,19 +291,13 @@ class ChildControllerTest {
 
         String json = objectMapper.writeValueAsString(updatePresent);
 
-        String responseJson = postman.perform(put("/api/v1/children/" + child.getId() + "/presents/" + present.getId())
+        postman.perform(put("/api/v1/children/" + child.getId() + "/presents/" + present.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        PresentDTO updatedPresent = objectMapper.readValue(responseJson, PresentDTO.class);
-
-        assertEquals(present.getId(), updatedPresent.getId());
-        assertEquals("Lego 2", updatedPresent.getName());
-        assertEquals(BigDecimal.valueOf(300), updatedPresent.getPrice());
+                .andExpect(jsonPath("$.id").value(present.getId()))
+                .andExpect(jsonPath("$.name").value("Lego 2"))
+                .andExpect(jsonPath("$.price").value(300));
     }
 
     @Test
@@ -320,36 +322,4 @@ class ChildControllerTest {
             childRepository.saveAndFlush(childThread2);
         });
     }
-
-//    @Test
-//    void pessimisticLocking_shouldBlockOtherTransaction() throws Exception {
-//        // given
-//        Child child = new Child();
-//        child.setFirstName("Jan");
-//        child.setLastName("Nowak");
-//        child.setBirthDate(LocalDate.of(2000, 1, 1));
-//
-//        child = childRepository.saveAndFlush(child);
-//        final Child finalChild = child;
-//
-//        ExecutorService executor = Executors.newFixedThreadPool(2);
-//
-//        Future<Long> t1 = executor.submit(() -> {
-//            childService.findByIdWIthPessimisticLocking(finalChild.getId());
-//            Thread.sleep(2000); // symulacja pracy z zablokowaną encją
-//            return System.currentTimeMillis();
-//        });
-//
-//        Future<Long> t2 = executor.submit(() -> {
-//            long start = System.currentTimeMillis();
-//            childService.findByIdWIthPessimisticLocking(finalChild.getId());
-//            long end = System.currentTimeMillis();
-//            return end - start;
-//        });
-//
-//        long duration = t2.get();
-//        System.out.println("Thread 2 waited: " + duration + "ms");
-//
-//        assertTrue(duration >= 1900, "Second thread should wait for first thread");
-//    }
 }

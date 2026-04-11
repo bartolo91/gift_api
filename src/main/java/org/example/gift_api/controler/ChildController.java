@@ -94,7 +94,9 @@ public class ChildController {
     @DeleteMapping("/{childId}/presents/{presentId}")
     public ResponseEntity<ChildDTO> removePresent(@PathVariable Long childId, @PathVariable Long presentId) {
         childService.removePresent(childId, presentId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
     @PutMapping("/{childId}/presents/{presentId}")
@@ -105,13 +107,14 @@ public class ChildController {
     }
 
     @GetMapping("/search")
-    public List<ChildView> search(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) Integer minAge,
-            @RequestParam(required = false) Integer maxAge,
-            @RequestParam(required = false) Integer minPresents,
-            @RequestParam(required = false) Integer maxPresents) {
-        return childService.findFilteredChildren(name, minAge, maxAge, minPresents, maxPresents);
+    public ResponseEntity<Page<ChildView>> search(@PageableDefault Pageable pageable,
+                                                  @RequestParam(required = false) String firstName,
+                                                  @RequestParam(required = false) String lastName,
+                                                  @RequestParam(required = false) Integer age,
+                                                  @RequestParam(required = false) Integer presents) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(childService.search(pageable, firstName, lastName, age, presents));
     }
 }
 

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: gift_api
+
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1523/XEPDB1
+    username: gift_api
+    password: gift_api
+    driver-class-name: oracle.jdbc.OracleDriver
+
+  jpa:
+    show-sql: true
+    generate-ddl: false
+    open-in-view: false
+    database-platform: org.hibernate.dialect.OracleDialect
+    hibernate:
+      ddl-auto: none

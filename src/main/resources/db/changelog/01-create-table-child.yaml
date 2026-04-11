@@ -2,11 +2,14 @@ databaseChangeLog:
   - changeSet:
       id: 01-create-child
       author: bartek
-
+      preConditions:
+      - onFail: MARK_RAN
+      - not:
+          - tableExists:
+              tableName: child
       changes:
         - createTable:
             tableName: child
-
             columns:
               - column:
                   name: id

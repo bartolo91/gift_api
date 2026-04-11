@@ -6,6 +6,8 @@ import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.ChildView;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -61,9 +63,14 @@ public interface ChildRepository extends JpaRepository<Child, Long> {
             @Param("maxPresents") Integer maxPresents
     );
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select c from Child c where c.id = :id")
-    Optional<Child> findByIdWIthPessimisticLocking(Long id);
+//    @Lock(LockModeType.PESSIMISTIC_WRITE)
+//    @Query("select c from Child c where c.id = :id")
+//    Optional<Child> findByIdWIthPessimisticLocking(Long id);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    Optional<Child> findWithLockingById(Long id);
+
+    @EntityGraph(attributePaths = {"presents"})
+    Page<Child> findAll(Specification<Child> spec, Pageable pageable);
 }
 
