@@ -27,11 +27,11 @@ public class PresentRegistrationJob {
 
 
     **/
-    private final PresentRegistrationService presentRegistrationService;
-
-    @Scheduled(cron = "*/5 * * * * *")
-    public void startProcessing() {
-        log.info("Processing started...");
-        presentRegistrationService.process();
-    }
+//    private final PresentRegistrationService presentRegistrationService;
+//
+//    @Scheduled(cron = "*/5 * * * * *")
+//    public void startProcessing() {
+//        log.info("Processing started...");
+//        presentRegistrationService.process();
+//    }
 }

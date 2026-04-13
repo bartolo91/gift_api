@@ -2,7 +2,6 @@ package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gift_api.mapper.ChildMapper;
-import org.example.gift_api.model.ChildSpecification;
 import org.example.gift_api.model.command.CreateChildCommand;
 import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
@@ -12,6 +11,7 @@ import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
 import org.example.gift_api.repository.ChildViewRepository;
+import org.example.gift_api.specification.ChildSpecificationBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.example.gift_api.exceptions.GiftApiException.badRequest;
 import static org.example.gift_api.exceptions.GiftApiException.notFound;
@@ -85,16 +87,39 @@ public class ChildService {
         return presentService.update(childId, presentId, updateCommand);
     }
 
-    public List<ChildView> findFilteredChildren(String name, Integer minAge, Integer maxAge, Integer minPresents, Integer maxPresents) {
-        return childRepository.findFilteredChildren(name, minAge, maxAge, minPresents, maxPresents);
-    }
+    public Page<ChildView> search(String search, Pageable pageable) {
+        ChildSpecificationBuilder builder = new ChildSpecificationBuilder();
 
-    public Page<ChildView> search(Pageable pageable, String firstName, String lastName, Integer age, Integer presents) {
-        Specification<ChildView> spec = ChildSpecification.hasFirstName(firstName)
-                .and(ChildSpecification.hasLastName(lastName))
-                .and(ChildSpecification.hasMinAge(age))
-                .and(ChildSpecification.hasMinPresents(presents));
+        if (search != null && !search.isEmpty()) {
+            String[] parts = search.split(",");
+
+            for (String part : parts) {
+                if (part.contains("|")) {
+                    String[] orParts = part.split("\\|");
+                    for (int i = 0; i < orParts.length; i++) {
+                        parseCondition(builder, orParts[i], i > 0);
+                    }
+                } else {
+                    parseCondition(builder, part, false);
+                }
+            }
+        }
+        Specification<ChildView> spec = builder.build();
 
         return childViewRepository.findAll(spec, pageable);
+    }
+
+    private void parseCondition(ChildSpecificationBuilder builder, String input, boolean orPredicate) {
+        Pattern pattern = Pattern.compile("(\\w+?)(:|>=|<=|>|<)(\\w+)");
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            builder.with(
+                    matcher.group(1),
+                    matcher.group(2),
+                    matcher.group(3),
+                    orPredicate
+            );
+        }
     }
 }

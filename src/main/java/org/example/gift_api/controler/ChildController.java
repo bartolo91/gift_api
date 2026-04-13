@@ -107,14 +107,9 @@ public class ChildController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Page<ChildView>> search(@PageableDefault Pageable pageable,
-                                                  @RequestParam(required = false) String firstName,
-                                                  @RequestParam(required = false) String lastName,
-                                                  @RequestParam(required = false) Integer age,
-                                                  @RequestParam(required = false) Integer presents) {
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(childService.search(pageable, firstName, lastName, age, presents));
+    public ResponseEntity<Page<ChildView>> search(@RequestParam(required = false) String search, Pageable pageable) {
+        return ResponseEntity.ok(childService.search(search, pageable));
     }
 }
+
 
