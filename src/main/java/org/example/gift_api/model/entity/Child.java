@@ -11,6 +11,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.SoftDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -28,6 +32,10 @@ import java.util.Set;
  * */
 //@NamedEntityGraph(name = "Child.presentSet",
 //        attributeNodes = {@NamedAttributeNode("presents")})
+//@SQLDelete(sql = "UPDATE child SET deleted = true WHERE id = ? AND version = ?")
+//@SQLRestriction("deleted = false")
+//@Where(clause = "deleted = false")
+@SoftDelete
 public class Child {
 
     @Id
@@ -38,6 +46,8 @@ public class Child {
     private String firstName;
     private String lastName;
     private LocalDate birthDate;
+
+//    private boolean deleted;
 
     @OneToMany(mappedBy = "child")
     @Builder.Default

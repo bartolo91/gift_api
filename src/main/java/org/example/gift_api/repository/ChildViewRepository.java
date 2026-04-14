@@ -6,5 +6,4 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface ChildViewRepository extends JpaRepository<ChildView, Long>, JpaSpecificationExecutor<ChildView> {
 
-
 }
