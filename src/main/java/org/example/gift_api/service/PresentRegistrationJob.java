@@ -2,8 +2,12 @@ package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 @Component
 @RequiredArgsConstructor
@@ -27,11 +31,20 @@ public class PresentRegistrationJob {
 
 
     **/
-    private final PresentRegistrationService presentRegistrationService;
-
-    @Scheduled(cron = "*/5 * * * * *")
-    public void startProcessing() {
-        log.info("Processing started...");
-        presentRegistrationService.process();
-    }
+//    private final PresentRegistrationService presentRegistrationService;
+//
+//    @SchedulerLock(
+//            name = "present-processing",
+//            lockAtMostFor = "5m",
+//            lockAtLeastFor = "20s")
+//    @Scheduled(cron = "*/5 * * * * *")
+//    public void startProcessing() throws UnknownHostException {
+//
+//        String host = InetAddress.getLocalHost().getHostName();
+//
+//        log.info("Processing started...");
+//        log.info("Processing started on instance: {}", host);
+//
+//        presentRegistrationService.process();
+//    }
 }

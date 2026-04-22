@@ -13,6 +13,7 @@ import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
 import org.example.gift_api.repository.ChildViewRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.example.gift_api.exceptions.GiftApiException.badRequest;
 import static org.example.gift_api.exceptions.GiftApiException.notFound;
@@ -34,6 +36,7 @@ public class ChildService {
 
     private final ChildRepository childRepository;
     private final PresentService presentService;
+    private final AsyncService asyncService;
     private final ChildViewRepository childViewRepository;
 
     public ChildDTO createChild(CreateChildCommand childCommand) {
@@ -96,5 +99,17 @@ public class ChildService {
                 .and(ChildSpecification.hasMinPresents(presents));
 
         return childViewRepository.findAll(spec, pageable);
+    }
+
+    public void getChildrenAsync() {
+        List<ChildView> children = childViewRepository
+                .findAll(PageRequest.of(0, 100))
+                .getContent();
+
+        List<CompletableFuture<Void>> futures = children.stream()
+                .map(asyncService::processChildAsync)
+                .toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 }

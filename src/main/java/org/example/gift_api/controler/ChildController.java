@@ -116,5 +116,12 @@ public class ChildController {
                 .status(HttpStatus.OK)
                 .body(childService.search(pageable, firstName, lastName, age, presents));
     }
+
+    @GetMapping("/test-async")
+    public String getAllAsync() {
+        childService.getChildrenAsync();
+        return "DONE";
+    }
+
 }
 

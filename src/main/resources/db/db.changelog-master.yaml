@@ -7,3 +7,5 @@ databaseChangeLog:
       file: db/changelog/03-create-view-child.yaml
   - include:
       file: db/changelog/03-soft-delete-child.xml
+  - include:
+      file: db/changelog/05-create-shedlock.xml

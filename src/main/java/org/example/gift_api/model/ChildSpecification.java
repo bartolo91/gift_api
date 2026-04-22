@@ -1,9 +1,6 @@
 package org.example.gift_api.model;
 
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
 import org.example.gift_api.model.entity.ChildView;
-import org.example.gift_api.model.entity.Present;
 import org.springframework.data.jpa.domain.Specification;
 
 public class ChildSpecification {
