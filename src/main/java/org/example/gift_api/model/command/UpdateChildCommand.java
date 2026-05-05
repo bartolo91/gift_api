@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.example.gift_api.validation.UniqueEmail;
+import org.example.gift_api.validation.UniqueFirstAndLastName;
 
 import java.time.LocalDate;
 
@@ -26,5 +28,9 @@ public class UpdateChildCommand {
 
     @NotNull(message = "NULL_VALUE")
     private Long version;
+
+    @UniqueEmail
+    @NotBlank(message = "NO_VALUE")
+    private String email;
 
 }

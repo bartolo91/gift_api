@@ -9,3 +9,5 @@ databaseChangeLog:
       file: db/changelog/03-soft-delete-child.xml
   - include:
       file: db/changelog/05-create-shedlock.xml
+  - include:
+      file: db/changelog/06-email-column-child.xml

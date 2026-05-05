@@ -11,10 +11,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import org.hibernate.annotations.SoftDelete;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -45,6 +42,7 @@ public class Child {
     private Long version = 0L;
     private String firstName;
     private String lastName;
+    private String email;
     private LocalDate birthDate;
 
 //    private boolean deleted;

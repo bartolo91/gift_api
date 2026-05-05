@@ -4,7 +4,6 @@ package org.example.gift_api.exceptions;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
-import static java.text.MessageFormat.format;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;

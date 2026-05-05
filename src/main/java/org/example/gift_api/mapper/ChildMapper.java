@@ -18,6 +18,7 @@ public class ChildMapper {
                 .firstName(command.getFirstName())
                 .lastName(command.getLastName())
                 .birthDate(command.getBirthDate())
+                .email(command.getEmail())
                 .build();
     }
 
@@ -29,6 +30,7 @@ public class ChildMapper {
                 .birthDate(child.getBirthDate())
                 .presentsCount((long) child.getPresents().size())
                 .version(child.getVersion())
+                .email(child.getEmail())
                 .build();
     }
 
@@ -48,6 +50,7 @@ public class ChildMapper {
                 .firstName(command.getFirstName())
                 .lastName(command.getLastName())
                 .birthDate(command.getBirthDate())
+                .email(command.getEmail())
                 .build();
     }
 

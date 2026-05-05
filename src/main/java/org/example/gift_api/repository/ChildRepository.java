@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,8 @@ public interface ChildRepository extends JpaRepository<Child, Long> {
                             c.lastName,
                             c.birthDate,
                             COUNT(p) AS presentsCount,
-                            c.version
+                            c.version,
+                            c.email                                           
                         )
                         FROM Child c
                         LEFT JOIN c.presents p
@@ -72,5 +74,29 @@ public interface ChildRepository extends JpaRepository<Child, Long> {
 
     @EntityGraph(attributePaths = {"presents"})
     Page<Child> findAll(Specification<Child> spec, Pageable pageable);
+
+//    @Query(
+//            value = """
+//                        SELECT DISTINCT new org.example.gift_api.model.dto.ChildDTO(
+//                            c.id,
+//                            c.firstName,
+//                            c.lastName
+//                        )
+//                        FROM Child c
+//                        JOIN c.presents p
+//                        WHERE p.price > :limitPrice
+//                    """,
+//            countQuery = """
+//                        SELECT COUNT(DISTINCT c)
+//                        FROM Child c
+//                        JOIN c.presents p
+//                        WHERE p.price > :limitPrice
+//                    """
+//    )
+//    Page<ChildDTO> findWithPresentWithPriceGreaterThan(Pageable pageable, BigDecimal limitPrice);
+
+    boolean existsByEmail(String emial);
+
+    boolean existsByFirstNameAndLastName(String firstName, String lastName);
 }
 

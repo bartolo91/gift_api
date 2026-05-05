@@ -1,4 +1,4 @@
-package org.example.gift_api.model;
+package org.example.gift_api.specification;
 
 import org.example.gift_api.model.entity.ChildView;
 import org.springframework.data.jpa.domain.Specification;

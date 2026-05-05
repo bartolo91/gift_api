@@ -5,11 +5,14 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.gift_api.validation.UniqueEmail;
+import org.example.gift_api.validation.UniqueFirstAndLastName;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@UniqueFirstAndLastName
 public class CreateChildCommand {
 
     @NotBlank(message = "NO_VALUE")
@@ -21,4 +24,8 @@ public class CreateChildCommand {
     @NotNull(message = "NULL_VALUE")
     @Past(message = "FUTURE_VALUE")
     private LocalDate birthDate;
+
+    @UniqueEmail
+    @NotBlank(message = "NO_VALUE")
+    private String email;
 }

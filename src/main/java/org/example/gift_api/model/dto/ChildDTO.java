@@ -19,4 +19,5 @@ public class ChildDTO {
     private LocalDate birthDate;
     private Long presentsCount;
     private Long version;
+    private String email;
 }

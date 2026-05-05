@@ -18,6 +18,9 @@ public class GlobalExceptionHandler {
         ValidationErrorDTO errorDTO = new ValidationErrorDTO();
         ex.getFieldErrors().forEach(error ->
                 errorDTO.addViolation(error.getField(), error.getDefaultMessage()));
+        ex.getGlobalErrors().forEach(error ->
+                errorDTO.addViolation(error.getObjectName(), error.getDefaultMessage()));
+
         return ResponseEntity.badRequest().body(errorDTO);
     }
 }
