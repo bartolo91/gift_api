@@ -2,6 +2,7 @@ package org.example.gift_api.repository;
 
 import jakarta.persistence.LockModeType;
 import org.example.gift_api.model.dto.ChildDTO;
+import org.example.gift_api.model.dto.ChildPresentProcessingDTO;
 import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.ChildView;
 import org.springframework.data.domain.Page;
@@ -75,25 +76,27 @@ public interface ChildRepository extends JpaRepository<Child, Long> {
     @EntityGraph(attributePaths = {"presents"})
     Page<Child> findAll(Specification<Child> spec, Pageable pageable);
 
-//    @Query(
-//            value = """
-//                        SELECT DISTINCT new org.example.gift_api.model.dto.ChildDTO(
-//                            c.id,
-//                            c.firstName,
-//                            c.lastName
-//                        )
-//                        FROM Child c
-//                        JOIN c.presents p
-//                        WHERE p.price > :limitPrice
-//                    """,
-//            countQuery = """
-//                        SELECT COUNT(DISTINCT c)
-//                        FROM Child c
-//                        JOIN c.presents p
-//                        WHERE p.price > :limitPrice
-//                    """
-//    )
-//    Page<ChildDTO> findWithPresentWithPriceGreaterThan(Pageable pageable, BigDecimal limitPrice);
+    @Query(
+            value = """
+                        SELECT new org.example.gift_api.model.dto.ChildPresentProcessingDTO(
+                            c.id,
+                            c.firstName,
+                            c.lastName,
+                            COUNT(p)
+                        )
+                        FROM Child c
+                        JOIN c.presents p
+                        WHERE p.price > :limitPrice
+                        GROUP BY c.id, c.firstName, c.lastName
+                    """,
+            countQuery = """
+                        SELECT COUNT(DISTINCT c.id)
+                        FROM Child c
+                        JOIN c.presents p
+                        WHERE p.price > :limitPrice
+                    """
+    )
+    Page<ChildPresentProcessingDTO> findChildrenWithExpensivePresents(@Param("limitPrice") BigDecimal limitPrice, Pageable pageable);
 
     boolean existsByEmail(String emial);
 

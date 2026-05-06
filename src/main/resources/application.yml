@@ -1,9 +1,0 @@
-server:
-  port: 8080
-
-spring:
-  profiles:
-    active: mysql
-
-  liquibase:
-      change-log: classpath:/db/db.changelog-master.yaml

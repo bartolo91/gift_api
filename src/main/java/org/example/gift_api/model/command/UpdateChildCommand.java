@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.example.gift_api.validation.UniqueEmail;
-import org.example.gift_api.validation.UniqueFirstAndLastName;
 
 import java.time.LocalDate;
 

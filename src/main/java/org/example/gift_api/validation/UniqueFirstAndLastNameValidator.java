@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UniqueFirstAndLastNameValidator implements ConstraintValidator<UniqueFirstAndLastName, CreateChildCommand> {
+public class UniqueFirstAndLastNameValidator implements ConstraintValidator<UniqueFirstAndLastName, CreateChildCommand> { // tylko co z update?
 
     private final ChildRepository repository;
 

@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "30s")
+@EnableSchedulerLock(defaultLockAtMostFor = "${scheduler.present-processing.default-lock-at-most-for}")
 @EnableAsync
 public class GiftApiApplication {
 
@@ -16,4 +16,6 @@ public class GiftApiApplication {
         SpringApplication.run(GiftApiApplication.class, args);
     }
 
+
+    // NEXT TIME ZACZAC OD DANYCH WYCIAGANYCH Z YAMLA
 }

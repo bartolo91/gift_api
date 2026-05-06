@@ -1,22 +1,40 @@
 package org.example.gift_api.configuration;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
+@Getter
+@Setter
 @Configuration
 public class AsyncConfiguration {
 
+    @Value("${async.executor.core-pool-size}")
+    private int corePoolSize;
+
+    @Value("${async.executor.max-pool-size}")
+    private int maxPoolSize;
+
+    @Value("${async.executor.queue-capacity}")
+    private int queueCapacity;
+
+    @Value("${async.executor.thread-name-prefix}")
+    private String threadNamePrefix;
+
     @Bean
-    public Executor executor() {
+    public Executor asyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(10);
-        executor.setMaxPoolSize(20);
-        executor.setQueueCapacity(100);
-        executor.setThreadNamePrefix("async-");
+        executor.setCorePoolSize(corePoolSize);
+        executor.setMaxPoolSize(maxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix(threadNamePrefix);
         executor.initialize();
         return executor;
     }
 }
+
