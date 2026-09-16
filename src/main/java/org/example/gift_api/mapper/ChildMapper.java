@@ -15,10 +15,10 @@ public class ChildMapper {
 
     public static Child mapFromCommand(CreateChildCommand command) {
         return Child.builder()
-                .firstName(command.getFirstName())
-                .lastName(command.getLastName())
-                .birthDate(command.getBirthDate())
-                .email(command.getEmail())
+//                .firstName(command.getFirstName())
+//                .lastName(command.getLastName())
+//                .birthDate(command.getBirthDate())
+//                .email(command.getEmail())
                 .build();
     }
 

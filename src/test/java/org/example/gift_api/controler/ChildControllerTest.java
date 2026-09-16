@@ -151,7 +151,7 @@ class ChildControllerTest {
                     .andReturn()
                     .getResponse();
         } catch (GiftApiException e) {
-            assertEquals(e.getMessage(), "ENTITY_NOT_FOUND ID: " + childId);
+            assertEquals("ENTITY_NOT_FOUND ID: " + childId, e.getMessage());
         }
     }
 

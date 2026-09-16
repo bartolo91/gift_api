@@ -20,10 +20,11 @@ public class UniqueFirstAndLastNameValidator implements ConstraintValidator<Uniq
 
     @Override
     public boolean isValid(CreateChildCommand command, ConstraintValidatorContext context) {
-        if (command.getFirstName() == null || command.getLastName() == null) {
-            return true;
-        }
-
-        return !repository.existsByFirstNameAndLastName(command.getFirstName(), command.getLastName());
+//        if (command.getFirstName() == null || command.getLastName() == null) {
+//            return true;
+//        }
+//
+//        return !repository.existsByFirstNameAndLastName(command.getFirstName(), command.getLastName());
+        return true;
     }
 }

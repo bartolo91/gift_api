@@ -1,5 +1,6 @@
 package org.example.gift_api.model.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SoftDelete;
 
 import java.time.LocalDate;
@@ -20,7 +23,8 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
+@ToString(exclude = "presents")
 @NoArgsConstructor
 @AllArgsConstructor
 /**
@@ -38,12 +42,15 @@ public class Child {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Version
-    private Long version = 0L;
     private String firstName;
     private String lastName;
-    private String email;
     private LocalDate birthDate;
+
+    @Column(unique = true)
+    private String email;
+
+    @Version
+    private Long version = 0L;
 
 //    private boolean deleted;
 

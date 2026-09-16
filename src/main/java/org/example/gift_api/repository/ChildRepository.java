@@ -82,19 +82,19 @@ public interface ChildRepository extends JpaRepository<Child, Long> {
                             c.id,
                             c.firstName,
                             c.lastName,
-                            COUNT(p)
+                            COUNT(p.id)
                         )
                         FROM Child c
-                        JOIN c.presents p
+                        LEFT JOIN c.presents p
                         WHERE p.price > :limitPrice
-                        GROUP BY c.id, c.firstName, c.lastName
-                    """,
-            countQuery = """
-                        SELECT COUNT(DISTINCT c.id)
-                        FROM Child c
-                        JOIN c.presents p
-                        WHERE p.price > :limitPrice
+                        GROUP BY c.id
                     """
+//            countQuery = """
+//                        SELECT COUNT(DISTINCT c.id)
+//                        FROM Child c
+//                        JOIN c.presents p
+//                        WHERE p.price > :limitPrice
+    //                """
     )
     Page<ChildPresentProcessingDTO> findChildrenWithExpensivePresents(@Param("limitPrice") BigDecimal limitPrice, Pageable pageable);
 

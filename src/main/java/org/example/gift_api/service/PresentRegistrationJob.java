@@ -28,7 +28,7 @@ public class PresentRegistrationJob {
      * <p>
      * ostateczny test powinien obejmować ograniczenie pamięci aplikacji do 200MB oraz przetwarzanie z bazy informacji dla przynajmniej
      * 2mln dzieciaków, po 2-3 prezenty każdy, z czego połowa prezentów powinna być powyżej wskazanej granicy
-     * */
+     **/
 
     private final PresentRegistrationService presentRegistrationService;
 

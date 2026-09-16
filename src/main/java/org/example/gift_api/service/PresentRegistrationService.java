@@ -22,6 +22,7 @@ public class PresentRegistrationService {
     private final ChildRepository childRepository;
     private final EmailService emailService;
 
+    //TODO: zrobić klasę z propertiesami
     @Value("${present.processing.page-size}")
     private int pageSize;
 
@@ -40,8 +41,6 @@ public class PresentRegistrationService {
             page = childRepository.findChildrenWithExpensivePresents(limitPrice, pageable);
 
             List<ChildPresentProcessingDTO> batch = page.getContent();
-
-            log.info("Page {}: {} children", pageNumber, batch.size());
 
             emailService.processBatch(batch);
             pageNumber++;

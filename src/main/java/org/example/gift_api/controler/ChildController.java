@@ -40,7 +40,7 @@ public class ChildController {
     public ResponseEntity<ChildDTO> create(@Valid @RequestBody CreateChildCommand childCommand) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(childService.createChild(childCommand));
+                .body(childService.create(childCommand));
     }
 
     @GetMapping("/{id}")

@@ -1,44 +1,58 @@
 package org.example.gift_api.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gift_api.mapper.ChildMapper;
 import org.example.gift_api.model.command.CreateChildCommand;
 import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.command.UpdatePresentCommand;
 import org.example.gift_api.model.dto.ChildDTO;
+import org.example.gift_api.model.dto.ChildPresentProcessingDTO;
 import org.example.gift_api.model.dto.PresentDTO;
 import org.example.gift_api.model.entity.Child;
 import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
 import org.example.gift_api.repository.ChildViewRepository;
+import org.example.gift_api.service.operations.ChildOperations;
 import org.example.gift_api.specification.ChildSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.example.gift_api.exceptions.GiftApiException.badRequest;
 import static org.example.gift_api.exceptions.GiftApiException.notFound;
 import static org.example.gift_api.mapper.ChildMapper.mapFromCommand;
 import static org.example.gift_api.mapper.ChildMapper.mapToDto;
 import static org.example.gift_api.mapper.ChildMapper.updateFromCommand;
+import static org.example.gift_api.service.operations.ChildOperations.SUFFIX;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChildService {
 
     private final ChildRepository childRepository;
     private final PresentService presentService;
-    private final EmailService asyncService;
     private final ChildViewRepository childViewRepository;
+    private final Map<String, ChildOperations> childrenOperations;
 
-    public ChildDTO createChild(CreateChildCommand childCommand) {
-        return mapToDto(childRepository.save(mapFromCommand(childCommand)));
+    public ChildDTO create(CreateChildCommand command) {
+        ChildOperations operations = childrenOperations.get(command.getType() + SUFFIX);
+        Child child = operations.create(command);
+        Child saved = childRepository.save(child);
+        log.info("Child created: {}", child);
+        return operations.mapToDTO(saved);
+//        return operations.mapToDTO(child);//TODO: tutaj powinien być jeszcze zapi do bazy - do realizacji w ramach pracy domowej
+//        return mapToDto(childRepository.save(mapFromCommand(command)));
     }
 
     public ChildDTO getChildById(Long id) {
@@ -97,6 +111,10 @@ public class ChildService {
                 .and(ChildSpecification.hasMinPresents(presents));
 
         return childViewRepository.findAll(spec, pageable);
+    }
+
+    public Page<ChildPresentProcessingDTO> getChildPresentProcessingDTO() {
+        return childRepository.findChildrenWithExpensivePresents(BigDecimal.valueOf(100), PageRequest.of(0, 10));
     }
 
 }

@@ -4,7 +4,6 @@ import org.example.gift_api.model.command.CreateChildCommand;
 import org.example.gift_api.model.command.UpdateChildCommand;
 import org.example.gift_api.model.dto.ChildDTO;
 import org.example.gift_api.model.entity.Child;
-import org.example.gift_api.model.entity.ChildView;
 import org.example.gift_api.repository.ChildRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,7 +42,7 @@ class ChildServiceTest {
 
         when(childRepository.save(any())).thenReturn(saved);
 
-        ChildDTO result = childService.createChild(command);
+        ChildDTO result = childService.create(command);
 
         assertEquals("Jan", result.getFirstName());
         verify(childRepository).save(any());

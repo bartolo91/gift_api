@@ -13,12 +13,9 @@ public class EmailService {
 
     @Async("asyncTaskExecutor")
     public void processBatch(List<ChildPresentProcessingDTO> batch) {
-
-        log.info("Processing async batch size: {}", batch.size());
-
         for (ChildPresentProcessingDTO dto : batch) {
             log.info("Sending email to child: {} {} (id={})", dto.getFirstName(), dto.getLastName(), dto.getId());
-            log.info("Presents > 100 PLN: {}", dto.getPresentsCount());
+            log.info("Count of presensts with price >100 PLN: {}", dto.getPresentsCount());
         }
     }
 }

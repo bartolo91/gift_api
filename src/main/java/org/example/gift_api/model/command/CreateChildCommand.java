@@ -9,23 +9,27 @@ import org.example.gift_api.validation.UniqueEmail;
 import org.example.gift_api.validation.UniqueFirstAndLastName;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Getter
 @Setter
-@UniqueFirstAndLastName
+//@UniqueFirstAndLastName
 public class CreateChildCommand {
 
-    @NotBlank(message = "NO_VALUE")
-    private String firstName;
+    private String type;
+    private Map<String, String> params;
 
-    @NotBlank(message = "NO_VALUE")
-    private String lastName;
-
-    @NotNull(message = "NULL_VALUE")
-    @Past(message = "FUTURE_VALUE")
-    private LocalDate birthDate;
-
-    @UniqueEmail
-    @NotBlank(message = "NO_VALUE")
-    private String email;
+//    @NotBlank(message = "NO_VALUE")
+//    private String firstName;
+//
+//    @NotBlank(message = "NO_VALUE")
+//    private String lastName;
+//
+//    @NotNull(message = "NULL_VALUE")
+//    @Past(message = "FUTURE_VALUE")
+//    private LocalDate birthDate;
+//
+//    @UniqueEmail
+//    @NotBlank(message = "NO_VALUE")
+//    private String email;
 }
